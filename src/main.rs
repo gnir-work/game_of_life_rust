@@ -6,7 +6,6 @@ use std::io;
 use std::vec::Vec;
 use termion::color;
 
-const BOARD_SIZE: usize = 51;
 const ALIVE_CELL: char = 'X';
 const DEAD_CELL: char = 'O';
 
@@ -17,6 +16,7 @@ struct Row {
 
 #[derive(Clone)]
 struct Board {
+    size: usize,
     rows: Vec<Row>,
 }
 
@@ -71,8 +71,8 @@ fn generate_random_board(size: usize) -> Board {
     let mut board = generate_dead_board(size);
     let mut rng = rand::thread_rng();
 
-    for row_index in 0..BOARD_SIZE {
-        for cell_index in 0..BOARD_SIZE {
+    for row_index in 0..size {
+        for cell_index in 0..size {
             if rng.gen_range(0..2) == 1 {
                 board.rows[row_index].cells[cell_index] = ALIVE_CELL
             }
@@ -83,8 +83,8 @@ fn generate_random_board(size: usize) -> Board {
 
 fn bread_new_board(current_board: &Board) -> Board {
     let mut new_board: Board = (*current_board).clone();
-    for row_index in 0..BOARD_SIZE {
-        for cell_index in 0..BOARD_SIZE {
+    for row_index in 0..current_board.size {
+        for cell_index in 0..current_board.size {
             new_board.rows[row_index].cells[cell_index] =
                 calculate_cells_next_state(current_board, (cell_index, row_index));
         }
@@ -112,7 +112,7 @@ fn get_number_of_neighbors(board: &Board, cell_location: (usize, usize)) -> usiz
     for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
         let new_location = (x as i32 + x_offset, y as i32 + y_offset);
         debug!("Check location {}, {}", new_location.0, new_location.1);
-        if is_location_valid(new_location) {
+        if is_location_valid(board, new_location) {
             let valid_location: (usize, usize) = (new_location.0 as usize, new_location.1 as usize);
             debug!(
                 "Location {}, {} is valid!",
@@ -127,11 +127,11 @@ fn get_number_of_neighbors(board: &Board, cell_location: (usize, usize)) -> usiz
     return number_of_neighbors;
 }
 
-fn is_location_valid(location: (i32, i32)) -> bool {
+fn is_location_valid(board: &Board, location: (i32, i32)) -> bool {
     return location.0 >= 0
         && location.1 >= 0
-        && location.0 < BOARD_SIZE as i32
-        && location.1 < BOARD_SIZE as i32;
+        && location.0 < board.size as i32
+        && location.1 < board.size as i32;
 }
 
 fn is_cell_alive(board: &Board, cell_location: (usize, usize)) -> bool {
@@ -150,7 +150,7 @@ fn generate_dead_board(size: usize) -> Board {
     for _ in 0..size {
         rows.push(generate_dead_row(size));
     }
-    return Board { rows: rows };
+    return Board { rows, size };
 }
 
 fn get_positive_number_from_user(prompt: &str) -> usize {
