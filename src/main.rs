@@ -54,7 +54,7 @@ impl Board {
         }
     }
 
-    fn get_number_of_neighbors(self: &Board, cell_location: (usize, usize)) -> usize {
+    fn get_number_of_neighbors(&self, cell_location: (usize, usize)) -> usize {
         let mut number_of_neighbors = 0;
         let (x, y) = cell_location;
         for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
@@ -74,19 +74,19 @@ impl Board {
         return number_of_neighbors;
     }
 
-    fn is_valid_location(self: &Board, location: (i32, i32)) -> bool {
+    fn is_valid_location(&self, location: (i32, i32)) -> bool {
         return location.0 >= 0
             && location.1 >= 0
             && location.0 < self.size as i32
             && location.1 < self.size as i32;
     }
 
-    fn is_cell_alive(self: &Board, location: (usize, usize)) -> bool {
+    fn is_cell_alive(&self, location: (usize, usize)) -> bool {
         let (x, y) = location;
         return self.rows[y].cells[x] == ALIVE_CELL;
     }
 
-    fn update_cell(self: &mut Board, location: (usize, usize), new_state: char) {
+    fn update_cell(&mut self, location: (usize, usize), new_state: char) {
         let (x, y) = location;
         self.rows[y].cells[x] = new_state;
     }
