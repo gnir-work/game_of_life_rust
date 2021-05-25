@@ -21,6 +21,26 @@ struct Board {
 }
 
 impl Board {
+    fn create_new_board(size: usize) -> Board {
+        let mut rng = rand::thread_rng();
+        let mut rows: Vec<Row> = Vec::with_capacity(size);
+        for _ in 0..size {
+            let mut cells = Vec::with_capacity(size);
+            for _ in 0..size {
+                if rng.gen_range(0..2) == 1 {
+                    cells.push(ALIVE_CELL);
+                } else {
+                    cells.push(DEAD_CELL);
+                }
+            }
+            rows.push(Row { cells });
+        }
+        return Board {
+            rows,
+            size,
+        };
+    }
+
     fn print(&self) {
         for row in self.rows.iter() {
             for cell in row.cells.iter() {
@@ -79,7 +99,7 @@ const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
 ];
 
 fn play_game(board_size: usize, rounds: usize) {
-    let initial_board = generate_random_board(board_size);
+    let initial_board = Board::create_new_board(board_size);
     let mut current_board = initial_board;
     println!("########### Welcome to the game of life ##########");
     for round in 0..rounds {
@@ -99,21 +119,6 @@ fn play_game(board_size: usize, rounds: usize) {
         rounds
     );
     current_board.print();
-}
-
-
-fn generate_random_board(size: usize) -> Board {
-    let mut board = generate_dead_board(size);
-    let mut rng = rand::thread_rng();
-
-    for row_index in 0..size {
-        for cell_index in 0..size {
-            if rng.gen_range(0..2) == 1 {
-                board.rows[row_index].cells[cell_index] = ALIVE_CELL
-            }
-        }
-    }
-    return board;
 }
 
 fn bread_new_board(current_board: &Board) -> Board {
@@ -139,21 +144,6 @@ fn calculate_cells_next_state(board: &Board, cell_location: (usize, usize)) -> c
     }
 
     return DEAD_CELL;
-}
-
-
-fn generate_dead_row(size: usize) -> Row {
-    return Row {
-        cells: vec![DEAD_CELL; size],
-    };
-}
-
-fn generate_dead_board(size: usize) -> Board {
-    let mut rows: Vec<Row> = Vec::with_capacity(size);
-    for _ in 0..size {
-        rows.push(generate_dead_row(size));
-    }
-    return Board { rows, size };
 }
 
 fn get_positive_number_from_user(prompt: &str) -> usize {
