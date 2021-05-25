@@ -85,6 +85,11 @@ impl Board {
         let (x, y) = location;
         return self.rows[y].cells[x] == ALIVE_CELL;
     }
+
+    fn update_cell(self: &mut Board, location: (usize, usize), new_state: char) {
+        let (x, y) = location;
+        self.rows[y].cells[x] = new_state;
+    }
 }
 
 const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
@@ -125,24 +130,23 @@ fn bread_new_board(current_board: &Board) -> Board {
     let mut new_board: Board = (*current_board).clone();
     for row_index in 0..current_board.size {
         for cell_index in 0..current_board.size {
-            new_board.rows[row_index].cells[cell_index] =
-                calculate_cells_next_state(current_board, (cell_index, row_index));
+            let location = (cell_index, row_index);
+            new_board.update_cell(location,
+                                  calculate_cell_next_state(current_board, location));
         }
     }
     return new_board;
 }
 
-fn calculate_cells_next_state(board: &Board, cell_location: (usize, usize)) -> char {
+fn calculate_cell_next_state(board: &Board, cell_location: (usize, usize)) -> char {
     let number_of_neighbors = board.get_number_of_neighbors(cell_location);
-    let (cell_index, row_index) = cell_location;
-    if board.rows[row_index].cells[cell_index] == ALIVE_CELL {
+    if board.is_cell_alive(cell_location) {
         if number_of_neighbors == 2 || number_of_neighbors == 3 {
             return ALIVE_CELL;
         }
     } else if number_of_neighbors == 3 {
         return ALIVE_CELL;
     }
-
     return DEAD_CELL;
 }
 
