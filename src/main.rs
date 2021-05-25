@@ -9,6 +9,17 @@ use termion::color;
 const ALIVE_CELL: char = 'X';
 const DEAD_CELL: char = 'O';
 
+const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
+
 #[derive(Clone)]
 struct Row {
     cells: Vec<char>,
@@ -92,16 +103,6 @@ impl Board {
     }
 }
 
-const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, -1),
-    (0, 1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-];
 
 fn play_game(board_size: usize, rounds: usize) {
     let initial_board = Board::create_new_board(board_size);
