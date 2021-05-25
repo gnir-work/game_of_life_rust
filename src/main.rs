@@ -34,11 +34,36 @@ impl Board {
         }
     }
 
+    fn get_number_of_neighbors(self: &Board, cell_location: (usize, usize)) -> usize {
+        let mut number_of_neighbors = 0;
+        let (x, y) = cell_location;
+        for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
+            let new_location = (x as i32 + x_offset, y as i32 + y_offset);
+            debug!("Check location {}, {}", new_location.0, new_location.1);
+            if self.is_valid_location(new_location) {
+                let valid_location: (usize, usize) = (new_location.0 as usize, new_location.1 as usize);
+                debug!(
+                    "Location {}, {} is valid!",
+                    valid_location.0, valid_location.1
+                );
+                if self.is_cell_alive(valid_location) {
+                    number_of_neighbors = number_of_neighbors + 1;
+                }
+            }
+        }
+        return number_of_neighbors;
+    }
+
     fn is_valid_location(self: &Board, location: (i32, i32)) -> bool {
         return location.0 >= 0
             && location.1 >= 0
             && location.0 < self.size as i32
             && location.1 < self.size as i32;
+    }
+
+    fn is_cell_alive(self: &Board, location: (usize, usize)) -> bool {
+        let (x, y) = location;
+        return self.rows[y].cells[x] == ALIVE_CELL;
     }
 }
 
@@ -103,7 +128,7 @@ fn bread_new_board(current_board: &Board) -> Board {
 }
 
 fn calculate_cells_next_state(board: &Board, cell_location: (usize, usize)) -> char {
-    let number_of_neighbors = get_number_of_neighbors(board, cell_location);
+    let number_of_neighbors = board.get_number_of_neighbors(cell_location);
     let (cell_index, row_index) = cell_location;
     if board.rows[row_index].cells[cell_index] == ALIVE_CELL {
         if number_of_neighbors == 2 || number_of_neighbors == 3 {
@@ -116,31 +141,6 @@ fn calculate_cells_next_state(board: &Board, cell_location: (usize, usize)) -> c
     return DEAD_CELL;
 }
 
-fn get_number_of_neighbors(board: &Board, cell_location: (usize, usize)) -> usize {
-    let mut number_of_neighbors = 0;
-    let (x, y) = cell_location;
-    for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
-        let new_location = (x as i32 + x_offset, y as i32 + y_offset);
-        debug!("Check location {}, {}", new_location.0, new_location.1);
-        if board.is_valid_location(new_location) {
-            let valid_location: (usize, usize) = (new_location.0 as usize, new_location.1 as usize);
-            debug!(
-                "Location {}, {} is valid!",
-                valid_location.0, valid_location.1
-            );
-            if is_cell_alive(board, valid_location) {
-                number_of_neighbors = number_of_neighbors + 1;
-            }
-        }
-    }
-
-    return number_of_neighbors;
-}
-
-fn is_cell_alive(board: &Board, cell_location: (usize, usize)) -> bool {
-    let (x, y) = cell_location;
-    return board.rows[y].cells[x] == ALIVE_CELL;
-}
 
 fn generate_dead_row(size: usize) -> Row {
     return Row {
