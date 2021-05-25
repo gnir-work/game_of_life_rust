@@ -20,6 +20,21 @@ struct Board {
     rows: Vec<Row>,
 }
 
+impl Board {
+    fn print(&self) {
+        for row in self.rows.iter() {
+            for cell in row.cells.iter() {
+                if cell == &ALIVE_CELL {
+                    print!("{}{}", color::Fg(color::Green), cell);
+                } else {
+                    print!("{}{}", color::Fg(color::White), cell);
+                };
+            }
+            println!();
+        }
+    }
+}
+
 const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
     (-1, -1),
     (-1, 0),
@@ -42,7 +57,7 @@ fn play_game(board_size: usize, rounds: usize) {
             color::Fg(color::Blue),
             round
         );
-        print_board(&current_board);
+        current_board.print();
         current_board = bread_new_board(&current_board);
     }
     println!();
@@ -51,21 +66,9 @@ fn play_game(board_size: usize, rounds: usize) {
         color::Fg(color::Blue),
         rounds
     );
-    print_board(&current_board);
+    current_board.print();
 }
 
-fn print_board(board: &Board) {
-    for row in board.rows.iter() {
-        for cell in row.cells.iter() {
-            if cell == &ALIVE_CELL {
-                print!("{}{}", color::Fg(color::Green), cell);
-            } else {
-                print!("{}{}", color::Fg(color::White), cell);
-            };
-        }
-        println!();
-    }
-}
 
 fn generate_random_board(size: usize) -> Board {
     let mut board = generate_dead_board(size);
