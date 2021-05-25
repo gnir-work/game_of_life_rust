@@ -33,6 +33,13 @@ impl Board {
             println!();
         }
     }
+
+    fn is_valid_location(self: &Board, location: (i32, i32)) -> bool {
+        return location.0 >= 0
+            && location.1 >= 0
+            && location.0 < self.size as i32
+            && location.1 < self.size as i32;
+    }
 }
 
 const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
@@ -115,7 +122,7 @@ fn get_number_of_neighbors(board: &Board, cell_location: (usize, usize)) -> usiz
     for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
         let new_location = (x as i32 + x_offset, y as i32 + y_offset);
         debug!("Check location {}, {}", new_location.0, new_location.1);
-        if is_location_valid(board, new_location) {
+        if board.is_valid_location(new_location) {
             let valid_location: (usize, usize) = (new_location.0 as usize, new_location.1 as usize);
             debug!(
                 "Location {}, {} is valid!",
@@ -128,13 +135,6 @@ fn get_number_of_neighbors(board: &Board, cell_location: (usize, usize)) -> usiz
     }
 
     return number_of_neighbors;
-}
-
-fn is_location_valid(board: &Board, location: (i32, i32)) -> bool {
-    return location.0 >= 0
-        && location.1 >= 0
-        && location.0 < board.size as i32
-        && location.1 < board.size as i32;
 }
 
 fn is_cell_alive(board: &Board, cell_location: (usize, usize)) -> bool {
