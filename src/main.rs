@@ -6,8 +6,32 @@ use std::io;
 use std::vec::Vec;
 use termion::color;
 
-const ALIVE_CELL: char = 'X';
-const DEAD_CELL: char = 'O';
+#[derive(Clone)]
+#[derive(PartialEq)]
+enum Cell {
+    Alive,
+    Dead,
+}
+
+impl std::fmt::Display for Cell {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Cell::Alive => "X".fmt(f),
+            Cell::Dead => "O".fmt(f),
+        }
+    }
+}
+
+#[derive(Clone)]
+struct Row {
+    cells: Vec<Cell>,
+}
+
+#[derive(Clone)]
+struct Board {
+    size: usize,
+    rows: Vec<Row>,
+}
 
 const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
     (-1, -1),
@@ -20,17 +44,6 @@ const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
     (1, 1),
 ];
 
-#[derive(Clone)]
-struct Row {
-    cells: Vec<char>,
-}
-
-#[derive(Clone)]
-struct Board {
-    size: usize,
-    rows: Vec<Row>,
-}
-
 impl Board {
     fn create_new_board(size: usize) -> Board {
         let mut rng = rand::thread_rng();
@@ -39,9 +52,9 @@ impl Board {
             let mut cells = Vec::with_capacity(size);
             for _ in 0..size {
                 if rng.gen_range(0..2) == 1 {
-                    cells.push(ALIVE_CELL);
+                    cells.push(Cell::Alive);
                 } else {
-                    cells.push(DEAD_CELL);
+                    cells.push(Cell::Dead);
                 }
             }
             rows.push(Row { cells });
@@ -55,11 +68,14 @@ impl Board {
     fn print(&self) {
         for row in self.rows.iter() {
             for cell in row.cells.iter() {
-                if cell == &ALIVE_CELL {
-                    print!("{}{}", color::Fg(color::Green), cell);
-                } else {
-                    print!("{}{}", color::Fg(color::White), cell);
-                };
+                match cell {
+                    Cell::Alive => {
+                        print!("{}{}", color::Fg(color::Green), cell);
+                    }
+                    Cell::Dead => {
+                        print!("{}{}", color::Fg(color::White), cell1);
+                    }
+                }
             }
             println!();
         }
@@ -94,10 +110,10 @@ impl Board {
 
     fn is_cell_alive(&self, location: (usize, usize)) -> bool {
         let (x, y) = location;
-        return self.rows[y].cells[x] == ALIVE_CELL;
+        return Cell::Alive == self.rows[y].cells[x];
     }
 
-    fn update_cell(&mut self, location: (usize, usize), new_state: char) {
+    fn update_cell(&mut self, location: (usize, usize), new_state: Cell) {
         let (x, y) = location;
         self.rows[y].cells[x] = new_state;
     }
@@ -139,16 +155,16 @@ fn bread_new_board(current_board: &Board) -> Board {
     return new_board;
 }
 
-fn calculate_cell_next_state(board: &Board, cell_location: (usize, usize)) -> char {
+fn calculate_cell_next_state(board: &Board, cell_location: (usize, usize)) -> Cell {
     let number_of_neighbors = board.get_number_of_neighbors(cell_location);
     if board.is_cell_alive(cell_location) {
         if number_of_neighbors == 2 || number_of_neighbors == 3 {
-            return ALIVE_CELL;
+            return Cell::Alive;
         }
     } else if number_of_neighbors == 3 {
-        return ALIVE_CELL;
+        return Cell::Alive;
     }
-    return DEAD_CELL;
+    return Cell::Dead;
 }
 
 fn get_positive_number_from_user(prompt: &str) -> usize {
