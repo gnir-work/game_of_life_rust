@@ -1,124 +1,8 @@
-extern crate termion;
+mod board;
 
-use log::debug;
-use rand::Rng;
-use std::io;
-use std::vec::Vec;
+use board::{Board, Cell};
 use termion::color;
-
-#[derive(Clone)]
-#[derive(PartialEq)]
-enum Cell {
-    Alive,
-    Dead,
-}
-
-impl std::fmt::Display for Cell {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Cell::Alive => "X".fmt(f),
-            Cell::Dead => "O".fmt(f),
-        }
-    }
-}
-
-#[derive(Clone)]
-struct Row {
-    cells: Vec<Cell>,
-}
-
-#[derive(Clone)]
-struct Board {
-    size: usize,
-    rows: Vec<Row>,
-}
-
-const NEIGHBOR_LOCATIONS: [(i32, i32); 8] = [
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, -1),
-    (0, 1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-];
-
-impl Board {
-    fn create_new_board(size: usize) -> Board {
-        let mut rng = rand::thread_rng();
-        let mut rows: Vec<Row> = Vec::with_capacity(size);
-        for _ in 0..size {
-            let mut cells = Vec::with_capacity(size);
-            for _ in 0..size {
-                if rng.gen_range(0..2) == 1 {
-                    cells.push(Cell::Alive);
-                } else {
-                    cells.push(Cell::Dead);
-                }
-            }
-            rows.push(Row { cells });
-        }
-        return Board {
-            rows,
-            size,
-        };
-    }
-
-    fn print(&self) {
-        for row in self.rows.iter() {
-            for cell in row.cells.iter() {
-                match cell {
-                    Cell::Alive => {
-                        print!("{}{}", color::Fg(color::Green), cell);
-                    }
-                    Cell::Dead => {
-                        print!("{}{}", color::Fg(color::White), cell1);
-                    }
-                }
-            }
-            println!();
-        }
-    }
-
-    fn get_number_of_neighbors(&self, cell_location: (usize, usize)) -> usize {
-        let mut number_of_neighbors = 0;
-        let (x, y) = cell_location;
-        for (x_offset, y_offset) in NEIGHBOR_LOCATIONS.iter() {
-            let new_location = (x as i32 + x_offset, y as i32 + y_offset);
-            debug!("Check location {}, {}", new_location.0, new_location.1);
-            if self.is_valid_location(new_location) {
-                let valid_location: (usize, usize) = (new_location.0 as usize, new_location.1 as usize);
-                debug!(
-                    "Location {}, {} is valid!",
-                    valid_location.0, valid_location.1
-                );
-                if self.is_cell_alive(valid_location) {
-                    number_of_neighbors = number_of_neighbors + 1;
-                }
-            }
-        }
-        return number_of_neighbors;
-    }
-
-    fn is_valid_location(&self, location: (i32, i32)) -> bool {
-        return location.0 >= 0
-            && location.1 >= 0
-            && location.0 < self.size as i32
-            && location.1 < self.size as i32;
-    }
-
-    fn is_cell_alive(&self, location: (usize, usize)) -> bool {
-        let (x, y) = location;
-        return Cell::Alive == self.rows[y].cells[x];
-    }
-
-    fn update_cell(&mut self, location: (usize, usize), new_state: Cell) {
-        let (x, y) = location;
-        self.rows[y].cells[x] = new_state;
-    }
-}
-
+use std::io;
 
 fn play_game(board_size: usize, rounds: usize) {
     let initial_board = Board::create_new_board(board_size);
@@ -156,7 +40,7 @@ fn bread_new_board(current_board: &Board) -> Board {
 }
 
 fn calculate_cell_next_state(board: &Board, cell_location: (usize, usize)) -> Cell {
-    let number_of_neighbors = board.get_number_of_neighbors(cell_location);
+    let number_of_neighbors = board.get_number_of_alive_cells(cell_location);
     if board.is_cell_alive(cell_location) {
         if number_of_neighbors == 2 || number_of_neighbors == 3 {
             return Cell::Alive;
