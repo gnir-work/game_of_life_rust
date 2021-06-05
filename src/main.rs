@@ -1,3 +1,11 @@
+//! An implementing of [Game of life game](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) in Rust!
+//!
+//! This game was implemented in order to learn the basics of rust while reading the [Rust Book](https://doc.rust-lang.org/book/title-page.html).
+//! The code is seperated into the following modules
+//! * [game_of_life](self) - The logic of the game.
+//! * [board] - All of the functionality regarding the board.
+
+
 mod board;
 
 use board::{Board, Cell};
